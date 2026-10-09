@@ -1,0 +1,14 @@
+# Öğrenci Not Takip Sistemi veri dosyası
+DERS;KYZ205;Nesne Tabanlı Programlama;4;Ayşe;Yılmaz;Bilgisayar Mühendisliği
+DERS;MAT101;Matematik I;3;Mehmet;Kaya;Matematik
+DERS;KYZ101;Programlamaya Giriş;3;Ayşe;Yılmaz;Bilgisayar Mühendisliği
+OGRENCI;2024001;Ali;Demir
+OGRENCI;2024002;Zeynep;Çelik
+OGRENCI;2024003;Can;Aydın
+NOT;2024001;KYZ205;85.0;90.0
+NOT;2024001;MAT101;70.0;65.0
+NOT;2024003;KYZ205;45.0;55.0
+NOT;2024003;KYZ101;60.0;58.0
+NOT;2024002;KYZ205;95.0;92.0
+NOT;2024002;MAT101;88.0;91.0
+NOT;2024002;KYZ101;80.0;85.0

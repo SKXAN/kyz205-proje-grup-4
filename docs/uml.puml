@@ -1,0 +1,127 @@
+@startuml OgrenciNotTakip
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+package model {
+  interface Raporlanabilir {
+    + rapor(): String
+  }
+
+  abstract class Kisi {
+    - ad: String
+    - soyad: String
+    + getAd(): String
+    + getSoyad(): String
+    + tamAd(): String
+    + {abstract} rol(): String
+  }
+
+  class Ogrenci {
+    - ogrenciNo: String
+    - dersler: List<Ders>
+    + getOgrenciNo(): String
+    + getDersler(): List<Ders>
+    + dersEkle(Ders): void
+    + dersAliyorMu(Ders): boolean
+    + rol(): String
+    + rapor(): String
+  }
+
+  class Ogretmen {
+    - brans: String
+    + getBrans(): String
+    + rol(): String
+    + rapor(): String
+  }
+
+  class Ders {
+    - kod: String
+    - ad: String
+    - kredi: int
+    - ogretimUyesi: Ogretmen
+    + getKod(): String
+    + getAd(): String
+    + getKredi(): int
+    + getOgretimUyesi(): Ogretmen
+    + setOgretimUyesi(Ogretmen): void
+    + rapor(): String
+  }
+
+  class Not {
+    + {static} VIZE_AGIRLIGI: double = 0.4
+    + {static} FINAL_AGIRLIGI: double = 0.6
+    - vize: double
+    - finalNotu: double
+    + ortalama(): double
+    + harfNotu(): HarfNotu
+    + gectiMi(): boolean
+  }
+
+  enum HarfNotu {
+    AA
+    BA
+    BB
+    CB
+    CC
+    DC
+    DD
+    FD
+    FF
+    - altSinir: int
+    - katsayi: double
+    + {static} hesapla(double): HarfNotu
+    + geciyorMu(): boolean
+  }
+}
+
+package service {
+  class NotDefteri {
+    - ogrenciler: Map<String, Ogrenci>
+    - dersler: Map<String, Ders>
+    - notlar: Map<String, Map<String, Not>>
+    + ogrenciEkle(Ogrenci): void
+    + dersEkle(Ders): void
+    + ogrenciBul(String): Ogrenci
+    + dersBul(String): Ders
+    + notAta(String, String, double, double): Not
+    + notGetir(String, String): Not
+    + ogrenciOrtalamasi(String): double
+    + ogrenciGano(String): double
+    + dersOrtalamasi(String): double
+    + basariSiralamasi(): List<Ogrenci>
+    + basariSiralamasi(String): List<Ogrenci>
+    + ogrenciRaporu(String): String
+  }
+
+  class DosyaYoneticisi {
+    + kaydet(NotDefteri, Path): void
+    + yukle(Path): NotDefteri
+  }
+
+  class KayitBulunamadiException extends RuntimeException {
+    + KayitBulunamadiException(String)
+  }
+}
+
+class Main {
+  + {static} main(String[]): void
+}
+
+Raporlanabilir <|.. Kisi
+Raporlanabilir <|.. Ders
+Kisi <|-- Ogrenci
+Kisi <|-- Ogretmen
+
+Ogrenci "1" o-- "*" Ders : alır
+Ders "*" --> "0..1" Ogretmen : verir
+Not ..> HarfNotu : hesaplar
+
+NotDefteri "1" *-- "*" Ogrenci
+NotDefteri "1" *-- "*" Ders
+NotDefteri "1" *-- "*" Not
+NotDefteri ..> KayitBulunamadiException : fırlatır
+DosyaYoneticisi ..> NotDefteri : kaydeder / yükler
+Main --> NotDefteri
+Main --> DosyaYoneticisi
+@enduml
