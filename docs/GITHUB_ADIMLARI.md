@@ -3,7 +3,7 @@
 Repo adı şartnameye göre `kyz205-proje-grup-4` olmalı (X = grup numaranız).
 Bu klasörün adını da aynı şekilde değiştirin.
 
-## 1. İlk kurulum (Üye 1, bir kez)
+## 1. İlk kurulum (Kamer, bir kez)
 
 ### GitHub'da repo aç
 
@@ -26,9 +26,9 @@ git remote add origin https://github.com/SKXAN/kyz205-proje-grup-4.git
 git push -u origin main
 ```
 
-### Üye 2'yi ekle
+### Hasan'ı ekle
 
-GitHub → repo → **Settings → Collaborators → Add people** → Üye 2'nin GitHub kullanıcı adı.
+GitHub → repo → **Settings → Collaborators → Add people** → Hasan'ın GitHub kullanıcı adı.
 
 ### Kendi branch'ini aç
 
@@ -37,19 +37,19 @@ git checkout -b kaan-gelistirme
 git push -u origin kaan-gelistirme
 ```
 
-## 2. Üye 2 için ilk kurulum (bir kez)
+## 2. Hasan için ilk kurulum (bir kez)
 
 ```bash
 git clone https://github.com/SKXAN/kyz205-proje-grup-4.git
 cd kyz205-proje-grup-4
-git checkout -b uye2-dokumantasyon
-git push -u origin uye2-dokumantasyon
+git checkout -b hasan-dokumantasyon
+git push -u origin hasan-dokumantasyon
 ```
 
 ## 3. Her değişiklikte yapılacaklar (her iki üye)
 
 ```bash
-git checkout uye2-dokumantasyon          # kendi branch'ine geç
+git checkout hasan-dokumantasyon          # kendi branch'ine geç
 git pull origin main                     # main'deki yenilikleri al
 # ... dosyaları düzenle ...
 git add .
@@ -61,7 +61,7 @@ Sonra GitHub'da:
 
 1. Repo sayfasında sarı **Compare & pull request** düğmesine bas.
 2. Başlık yaz (commit mesajı gibi açıklayıcı), **Create pull request**.
-3. Üye 1 PR'ı açar, **Files changed** sekmesinde bakar, **Merge pull request** → **Confirm merge**.
+3. Kamer PR'ı açar, **Files changed** sekmesinde bakar, **Merge pull request** → **Confirm merge**.
 
 ## 4. İyi commit mesajı örnekleri
 
@@ -81,9 +81,9 @@ Kalıp: `Dosya/Alan: ne yapıldı` şeklinde, Türkçe, geçmiş zaman.
 
 Eğitmen "haftada en az 1 commit" arıyor. Her hafta:
 
-- **Üye 1**: kod değişikliği veya refaktör → commit → PR → merge
-- **Üye 2**: [GOREV_DAGILIMI.md](GOREV_DAGILIMI.md) tablosundan bir görev → commit → PR
-- Üye 1 PR'ı merge eder
+- **Kamer**: kod değişikliği veya refaktör → commit → PR → merge
+- **Hasan**: [GOREV_DAGILIMI.md](GOREV_DAGILIMI.md) tablosundan bir görev → commit → PR
+- Kamer PR'ı merge eder
 
 ## 6. Sık karşılaşılan sorunlar
 

@@ -10,7 +10,7 @@ konsol tabanlı bir Java uygulaması.
 | Üye | Roller |
 |-----|--------|
 | Kamer Kaan Şahin | GitHub Sorumlusu, Tasarım Sorumlusu |
-| [Ad Soyad 2] | Dokümantasyon Sorumlusu, Test/Kalite Sorumlusu |
+| Hasan Enes Yıldırım | Dokümantasyon Sorumlusu, Test/Kalite Sorumlusu |
 
 ## Özellikler
 

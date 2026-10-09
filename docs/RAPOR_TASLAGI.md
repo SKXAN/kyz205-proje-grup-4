@@ -1,7 +1,7 @@
 # KYZ205 Proje Raporu: Öğrenci Not Takip Sistemi
 
 **Grup:** 4
-**Üyeler:** Kamer Kaan Şahin, [Ad Soyad 2]
+**Üyeler:** Kamer Kaan Şahin, Hasan Enes Yıldırım
 **Repo:** https://github.com/SKXAN/kyz205-proje-grup-4
 **Tarih:** [GG.AA.YYYY]
 
@@ -9,14 +9,14 @@
 
 ## 1. Proje Tanımı ve Amaç
 
-[Üye 2 doldurur]
+[Hasan doldurur]
 
 Sistemin ne yaptığını 3–5 cümleyle anlat: hangi problemi çözüyor, kim kullanır,
 girdi ve çıktılar neler. README'nin ilk paragrafından yararlanabilirsin.
 
 ## 2. Gereksinimler
 
-[Üye 2 doldurur]
+[Hasan doldurur]
 
 Şartnamedeki "minimum özellikler" listesini maddeler halinde yaz ve her birinin
 programda hangi menü seçeneğine karşılık geldiğini belirt.
@@ -87,7 +87,7 @@ Kısa kod örnekleri ve açıklamaları (örneğin `Not.ortalama()` ve `HarfNotu
 
 ## 6. GitHub Süreci
 
-- Branch yapısı: `main`, `kaan-gelistirme`, `uye2-dokumantasyon`
+- Branch yapısı: `main`, `kaan-gelistirme`, `hasan-dokumantasyon`
 - Toplam commit sayısı: [...]
 - PR sayısı: [...]
 - [Commit grafiği ekran görüntüsü: repo → Insights → Contributors]
@@ -97,7 +97,7 @@ Kısa kod örnekleri ve açıklamaları (örneğin `Not.ortalama()` ve `HarfNotu
 | Üye | Roller | Yaptığı işler |
 |-----|--------|---------------|
 | Kamer Kaan Şahin | GitHub, Tasarım | ... |
-| [Ad Soyad 2] | Dokümantasyon, Test/Kalite | ... |
+| Hasan Enes Yıldırım | Dokümantasyon, Test/Kalite | ... |
 
 ## 8. Karşılaşılan Zorluklar ve Çözümler
 
