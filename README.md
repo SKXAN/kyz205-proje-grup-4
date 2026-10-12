@@ -10,7 +10,8 @@ konsol tabanlı bir Java uygulaması.
 | Üye | Roller |
 |-----|--------|
 | Kamer Kaan Şahin | GitHub Sorumlusu, Tasarım Sorumlusu |
-| Hasan Enes Yıldırım | Dokümantasyon Sorumlusu, Test/Kalite Sorumlusu |
+| Hasan Enes Yıldırım | Test/Kalite Sorumlusu |
+| Ayşe Eroğlu | Dokümantasyon Sorumlusu |
 
 ## Özellikler
 

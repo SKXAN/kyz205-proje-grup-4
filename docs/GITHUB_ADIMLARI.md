@@ -26,9 +26,9 @@ git remote add origin https://github.com/SKXAN/kyz205-proje-grup-4.git
 git push -u origin main
 ```
 
-### Hasan'ı ekle
+### Hasan ve Ayşe'yi ekle
 
-GitHub → repo → **Settings → Collaborators → Add people** → Hasan'ın GitHub kullanıcı adı.
+GitHub → repo → **Settings → Collaborators → Add people** → Hasan'ın ve Ayşe'nin GitHub kullanıcı adları. İkisi de e-postadaki daveti kabul etmeli.
 
 ### Kendi branch'ini aç
 
@@ -37,19 +37,38 @@ git checkout -b kaan-gelistirme
 git push -u origin kaan-gelistirme
 ```
 
-## 2. Hasan için ilk kurulum (bir kez)
+## 2. Hasan ve Ayşe için ilk kurulum (bir kez)
+
+Önce github.com'da hesap açın (yoksa), sonra Kamer'in gönderdiği daveti e-postadan kabul edin.
+Bilgisayarınızda Git yüklü değilse https://git-scm.com/download/win adresinden kurun.
+
+Hasan:
 
 ```bash
 git clone https://github.com/SKXAN/kyz205-proje-grup-4.git
 cd kyz205-proje-grup-4
-git checkout -b hasan-dokumantasyon
-git push -u origin hasan-dokumantasyon
+git checkout hasan-test
+```
+
+Ayşe:
+
+```bash
+git clone https://github.com/SKXAN/kyz205-proje-grup-4.git
+cd kyz205-proje-grup-4
+git checkout ayse-dokumantasyon
+```
+
+İlk commit'ten önce bir kez adınızı tanıtın:
+
+```bash
+git config --global user.name "Ad Soyad"
+git config --global user.email "github-epostaniz@ornek.com"
 ```
 
 ## 3. Her değişiklikte yapılacaklar (her iki üye)
 
 ```bash
-git checkout hasan-dokumantasyon          # kendi branch'ine geç
+git checkout hasan-test                  # kendi branch'ine geç (Ayşe: ayse-dokumantasyon)
 git pull origin main                     # main'deki yenilikleri al
 # ... dosyaları düzenle ...
 git add .
@@ -82,7 +101,8 @@ Kalıp: `Dosya/Alan: ne yapıldı` şeklinde, Türkçe, geçmiş zaman.
 Eğitmen "haftada en az 1 commit" arıyor. Her hafta:
 
 - **Kamer**: kod değişikliği veya refaktör → commit → PR → merge
-- **Hasan**: [GOREV_DAGILIMI.md](GOREV_DAGILIMI.md) tablosundan bir görev → commit → PR
+- **Hasan**: [GOREV_DAGILIMI.md](GOREV_DAGILIMI.md) Hasan tablosundan bir görev → commit → PR
+- **Ayşe**: [GOREV_DAGILIMI.md](GOREV_DAGILIMI.md) Ayşe tablosundan bir görev → commit → PR
 - Kamer PR'ı merge eder
 
 ## 6. Sık karşılaşılan sorunlar
