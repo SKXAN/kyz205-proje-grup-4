@@ -22,7 +22,9 @@ konsol tabanlı bir Java uygulaması.
 - Kredi ağırlıklı genel ortalama ve GANO (4'lük sistem)
 - Ders bazlı sınıf ortalaması
 - Genel ve ders bazlı başarı sıralaması
+- Öğrenci ve ders silme (bağlı notlar da temizlenir, onay sorulur)
 - Verileri metin dosyasına kaydetme ve geri yükleme
+- Açılışta `notdefteri.txt` varsa otomatik yükleme, çıkışta otomatik kaydetme
 - Hatalı girişlerde (0–100 dışı not, mükerrer kayıt, olmayan öğrenci) anlamlı hata mesajları
 
 ## Kullanılan OOP İlkeleri
@@ -184,6 +186,8 @@ kyz205-proje-grup-4/
     └── test/java/com/kyz205/nottakip/
         ├── model/NotTest.java
         ├── model/HarfNotuTest.java
+        ├── model/OgrenciTest.java
+        ├── model/DersTest.java
         ├── service/NotDefteriTest.java
         └── service/DosyaYoneticisiTest.java
 ```
@@ -238,11 +242,17 @@ Program açıldığında numaralı bir menü görünür:
 9) Dosyaya kaydet
 10) Dosyadan yükle
 11) Örnek verileri yükle
-0) Çıkış
+12) Öğrenci sil
+13) Ders sil
+0) Çıkış (veriler otomatik kaydedilir)
 Seçiminiz:
 ```
 
 Hızlı deneme için **11** ile örnek verileri yükleyin, sonra **6** ile sıralamayı görün.
+
+Program açılırken çalışma klasöründe `notdefteri.txt` varsa onu otomatik yükler;
+**0** ile çıkarken mevcut verileri aynı dosyaya otomatik kaydeder. Böylece
+girilen kayıtlar bir sonraki açılışta hazır gelir.
 
 ### Örnek akış
 
@@ -281,13 +291,15 @@ NOT;2024001;KYZ205;85.0;90.0
 
 ## Testler
 
-JUnit 5 ile yazılmış 20 birim testi bulunur:
+JUnit 5 ile yazılmış 32 birim testi bulunur:
 
 | Test sınıfı | Kapsam |
 |-------------|--------|
 | `NotTest` | Ağırlıklı ortalama, harf notu, geçme durumu, 0–100 doğrulaması |
 | `HarfNotuTest` | Harf sınırları ve katsayılar |
-| `NotDefteriTest` | Not atama, mükerrer kayıt, sınıf ortalaması, kredi ağırlıklı ortalama, sıralama |
+| `OgrenciTest` | Boş alan doğrulaması, ders ekleme/çıkarma, eşitlik |
+| `DersTest` | Kredi doğrulaması, kod normalizasyonu, öğretim üyesi raporu |
+| `NotDefteriTest` | Not atama, mükerrer kayıt, silme, sınıf ortalaması, kredi ağırlıklı ortalama, sıralama |
 | `DosyaYoneticisiTest` | Kaydet/yükle döngüsü, hatalı dosya |
 
 ```bash
@@ -302,6 +314,6 @@ mvnw.cmd test
 | En az 1 kalıtım veya arayüz | `Kisi` kalıtımı ve `Raporlanabilir` arayüzü |
 | Koleksiyon veya dosya G/Ç | Her ikisi: `HashMap`/`ArrayList` ve `DosyaYoneticisi` |
 | UML sınıf diyagramı | Yukarıda (Mermaid) ve `docs/uml.puml` |
-| En az 3 birim testi | 20 test |
+| En az 3 birim testi | 32 test |
 | README.md | Bu dosya |
 | GitHub reposu | `kyz205-proje-grup-4` |

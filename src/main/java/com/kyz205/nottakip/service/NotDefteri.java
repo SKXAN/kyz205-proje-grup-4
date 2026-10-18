@@ -50,6 +50,34 @@ public class NotDefteri {
         dersler.put(ders.getKod(), ders);
     }
 
+    /**
+     * Öğrenciyi ve ona ait tüm notları siler. Silinen öğrenciyi döndürür.
+     * Öğrenci kayıtlı değilse KayitBulunamadiException fırlatır.
+     */
+    public Ogrenci ogrenciSil(String ogrenciNo) {
+        Ogrenci ogrenci = ogrenciBul(ogrenciNo);
+        ogrenciler.remove(ogrenci.getOgrenciNo());
+        notlar.remove(ogrenci.getOgrenciNo());
+        return ogrenci;
+    }
+
+    /**
+     * Dersi siler; dersi alan öğrencilerin ders listesinden ve not kayıtlarından
+     * da kaldırır. Silinen dersi döndürür. Ders kayıtlı değilse
+     * KayitBulunamadiException fırlatır.
+     */
+    public Ders dersSil(String dersKodu) {
+        Ders ders = dersBul(dersKodu);
+        dersler.remove(ders.getKod());
+        for (Map<String, Not> ogrencininNotlari : notlar.values()) {
+            ogrencininNotlari.remove(ders.getKod());
+        }
+        for (Ogrenci ogrenci : ogrenciler.values()) {
+            ogrenci.dersCikar(ders);
+        }
+        return ders;
+    }
+
     public Ogrenci ogrenciBul(String ogrenciNo) {
         Ogrenci ogrenci = ogrenciler.get(ogrenciNo);
         if (ogrenci == null) {

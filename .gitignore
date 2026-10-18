@@ -11,6 +11,9 @@ out/
 .project
 .classpath
 
+# Çalışma zamanında üretilen veri dosyası
+notdefteri.txt
+
 # İşletim sistemi
 .DS_Store
 Thumbs.db

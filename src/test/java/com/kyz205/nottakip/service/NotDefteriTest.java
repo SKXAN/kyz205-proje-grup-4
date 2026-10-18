@@ -114,6 +114,42 @@ class NotDefteriTest {
     }
 
     @Test
+    @DisplayName("Öğrenci silinince notları da silinir")
+    void ogrenciSil() {
+        defter.notAta("1001", "KYZ205", 80, 80);
+        defter.notAta("1002", "KYZ205", 60, 60);
+
+        Ogrenci silinen = defter.ogrenciSil("1001");
+        assertEquals("Ali Demir", silinen.tamAd());
+        assertEquals(2, defter.tumOgrenciler().size());
+        assertThrows(KayitBulunamadiException.class, () -> defter.ogrenciBul("1001"));
+        assertEquals(1, defter.dersiAlanSayisi("KYZ205"));
+        assertEquals(60.0, defter.dersOrtalamasi("KYZ205"), 0.0001);
+    }
+
+    @Test
+    @DisplayName("Ders silinince öğrencilerin listesinden ve notlardan kalkar")
+    void dersSil() {
+        defter.notAta("1001", "KYZ205", 90, 90);
+        defter.notAta("1001", "MAT101", 50, 50);
+
+        defter.dersSil("kyz205");
+        assertEquals(1, defter.tumDersler().size());
+        assertThrows(KayitBulunamadiException.class, () -> defter.dersBul("KYZ205"));
+        assertThrows(KayitBulunamadiException.class, () -> defter.notGetir("1001", "KYZ205"));
+        assertTrue(!defter.ogrenciBul("1001").dersAliyorMu(oop));
+        // Kalan tek ders MAT101 (50), ortalama ona göre hesaplanmalı
+        assertEquals(50.0, defter.ogrenciOrtalamasi("1001"), 0.0001);
+    }
+
+    @Test
+    @DisplayName("Kayıtlı olmayan öğrenci veya ders silinemez")
+    void olmayanKayitSilinemez() {
+        assertThrows(KayitBulunamadiException.class, () -> defter.ogrenciSil("9999"));
+        assertThrows(KayitBulunamadiException.class, () -> defter.dersSil("YOK101"));
+    }
+
+    @Test
     @DisplayName("Öğrenci raporu ders ve ortalama bilgisini içerir")
     void ogrenciRaporu() {
         defter.notAta("1001", "KYZ205", 80, 90);
