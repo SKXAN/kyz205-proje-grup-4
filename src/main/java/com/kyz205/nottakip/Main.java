@@ -8,6 +8,7 @@ import com.kyz205.nottakip.service.KayitBulunamadiException;
 import com.kyz205.nottakip.service.NotDefteri;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Scanner;
@@ -29,6 +30,7 @@ public class Main {
 
     private void calistir() {
         System.out.println("=== Öğrenci Not Takip Sistemi ===");
+        otomatikYukle();
         boolean devam = true;
         while (devam) {
             menuyuYazdir();
@@ -42,7 +44,33 @@ public class Main {
             }
             System.out.println();
         }
+        otomatikKaydet();
         System.out.println("Program sonlandırıldı.");
+    }
+
+    /** Açılışta varsayılan veri dosyası varsa sessizce yükler. */
+    private void otomatikYukle() {
+        if (!Files.exists(VARSAYILAN_DOSYA)) {
+            return;
+        }
+        try {
+            defter = dosya.yukle(VARSAYILAN_DOSYA);
+            System.out.println(VARSAYILAN_DOSYA + " dosyasından " + defter.tumOgrenciler().size()
+                    + " öğrenci, " + defter.tumDersler().size() + " ders yüklendi.");
+        } catch (IOException hata) {
+            System.out.println("Uyarı: " + VARSAYILAN_DOSYA + " okunamadı, boş defterle başlanıyor. ("
+                    + hata.getMessage() + ")");
+        }
+    }
+
+    /** Çıkışta mevcut defteri varsayılan dosyaya kaydeder. */
+    private void otomatikKaydet() {
+        try {
+            dosya.kaydet(defter, VARSAYILAN_DOSYA);
+            System.out.println("Veriler " + VARSAYILAN_DOSYA + " dosyasına kaydedildi.");
+        } catch (IOException hata) {
+            System.out.println("Uyarı: veriler kaydedilemedi. (" + hata.getMessage() + ")");
+        }
     }
 
     private void menuyuYazdir() {
@@ -58,7 +86,9 @@ public class Main {
         System.out.println("9) Dosyaya kaydet");
         System.out.println("10) Dosyadan yükle");
         System.out.println("11) Örnek verileri yükle");
-        System.out.println("0) Çıkış");
+        System.out.println("12) Öğrenci sil");
+        System.out.println("13) Ders sil");
+        System.out.println("0) Çıkış (veriler otomatik kaydedilir)");
     }
 
     /** Menü seçimini işler; program devam edecekse true döner. */
@@ -75,6 +105,8 @@ public class Main {
             case "9" -> kaydet();
             case "10" -> yukle();
             case "11" -> ornekVeriYukle();
+            case "12" -> ogrenciSil();
+            case "13" -> dersSil();
             case "0" -> {
                 return false;
             }
@@ -103,6 +135,31 @@ public class Main {
         Ogretmen hoca = new Ogretmen(hocaAd, hocaSoyad, brans);
         defter.dersEkle(new Ders(kod, ad, kredi, hoca));
         System.out.println("Ders eklendi.");
+    }
+
+    private void ogrenciSil() {
+        String no = oku("Silinecek öğrenci no: ");
+        Ogrenci ogrenci = defter.ogrenciBul(no);
+        String onay = oku(ogrenci.tamAd() + " ve tüm notları silinecek. Emin misiniz? (E/h): ");
+        if (!onay.equalsIgnoreCase("E")) {
+            System.out.println("İptal edildi.");
+            return;
+        }
+        defter.ogrenciSil(no);
+        System.out.println("Öğrenci silindi: " + ogrenci.tamAd());
+    }
+
+    private void dersSil() {
+        String kod = oku("Silinecek ders kodu: ");
+        Ders ders = defter.dersBul(kod);
+        int alan = defter.dersiAlanSayisi(kod);
+        String onay = oku(ders + " silinecek (" + alan + " öğrencinin notu da silinir). Emin misiniz? (E/h): ");
+        if (!onay.equalsIgnoreCase("E")) {
+            System.out.println("İptal edildi.");
+            return;
+        }
+        defter.dersSil(kod);
+        System.out.println("Ders silindi: " + ders);
     }
 
     private void notAta() {

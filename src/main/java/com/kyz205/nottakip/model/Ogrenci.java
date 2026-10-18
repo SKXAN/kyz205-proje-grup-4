@@ -39,6 +39,11 @@ public class Ogrenci extends Kisi {
         }
     }
 
+    /** Dersi öğrencinin listesinden çıkarır; ders listede yoksa false döner. */
+    public boolean dersCikar(Ders ders) {
+        return dersler.remove(ders);
+    }
+
     public boolean dersAliyorMu(Ders ders) {
         return dersler.contains(ders);
     }
