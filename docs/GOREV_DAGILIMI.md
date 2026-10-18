@@ -6,9 +6,9 @@
 
 | Üye | Birincil rol | Sorumluluk |
 |-----|--------------|------------|
-| **Kamer Kaan Şahin** | GitHub Sorumlusu, Tasarım Sorumlusu | Repo ve branch düzeni, PR inceleme ve merge, UML, sınıf tasarımı, çekirdek kod |
-| **Hasan Enes Yıldırım** | Test/Kalite Sorumlusu | Testlerin çalıştırılması, sonuçların kaydı, hata bildirimi |
-| **Ayşe Eroğlu** | Dokümantasyon Sorumlusu | README içeriği, rapor, sunum |
+| **Kamer Kaan Şahin** (`SKXAN`) | GitHub Sorumlusu, Tasarım Sorumlusu | Repo ve branch düzeni, PR inceleme ve merge, UML, sınıf tasarımı, çekirdek kod |
+| **Hasan Enes Yıldırım** (`hasanenes06`) | Test/Kalite Sorumlusu | Testlerin çalıştırılması, sonuçların kaydı, hata bildirimi |
+| **Ayşe Eroğlu** (`ayseeroglu`) | Dokümantasyon Sorumlusu | README içeriği, rapor, sunum |
 
 Kamer iki rol üstlenmiştir; GitHub ve tasarım işleri birbirine bağlı olduğu için tek kişide toplanması iş akışını kolaylaştırır.
 

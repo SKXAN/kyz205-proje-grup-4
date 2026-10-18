@@ -28,7 +28,7 @@ git push -u origin main
 
 ### Hasan ve Ayşe'yi ekle
 
-GitHub → repo → **Settings → Collaborators → Add people** → Hasan'ın ve Ayşe'nin GitHub kullanıcı adları. İkisi de e-postadaki daveti kabul etmeli.
+GitHub → repo → **Settings → Collaborators → Add people** → sırayla `hasanenes06` ve `ayseeroglu`. İkisi de e-postadaki daveti kabul etmeli.
 
 ### Kendi branch'ini aç
 
