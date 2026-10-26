@@ -58,6 +58,20 @@ package model {
     + gectiMi(): boolean
   }
 
+  class DersIstatistigi {
+    - ders: Ders
+    - ogrenciSayisi: int
+    - ortalama: double
+    - enYuksekOgrenci: Ogrenci
+    - enYuksekNot: Not
+    - enDusukOgrenci: Ogrenci
+    - enDusukNot: Not
+    - gecenSayisi: int
+    + getKalanSayisi(): int
+    + getBasariOrani(): double
+    + bosMu(): boolean
+  }
+
   enum HarfNotu {
     AA
     BA
@@ -81,7 +95,9 @@ package service {
     - dersler: Map<String, Ders>
     - notlar: Map<String, Map<String, Not>>
     + ogrenciEkle(Ogrenci): void
+    + ogrenciSil(String): Ogrenci
     + dersEkle(Ders): void
+    + dersSil(String): Ders
     + ogrenciBul(String): Ogrenci
     + dersBul(String): Ders
     + notAta(String, String, double, double): Not
@@ -89,6 +105,8 @@ package service {
     + ogrenciOrtalamasi(String): double
     + ogrenciGano(String): double
     + dersOrtalamasi(String): double
+    + dersIstatistigi(String): DersIstatistigi
+    + dersRaporu(String): String
     + basariSiralamasi(): List<Ogrenci>
     + basariSiralamasi(String): List<Ogrenci>
     + ogrenciRaporu(String): String
@@ -120,6 +138,8 @@ Not ..> HarfNotu : hesaplar
 NotDefteri "1" *-- "*" Ogrenci
 NotDefteri "1" *-- "*" Ders
 NotDefteri "1" *-- "*" Not
+NotDefteri ..> DersIstatistigi : üretir
+DersIstatistigi --> Ders
 NotDefteri ..> KayitBulunamadiException : fırlatır
 DosyaYoneticisi ..> NotDefteri : kaydeder / yükler
 Main --> NotDefteri

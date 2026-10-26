@@ -21,6 +21,7 @@ konsol tabanlı bir Java uygulaması.
 - Ortalama, harf notu (AA–FF) ve geçme durumu hesaplama
 - Kredi ağırlıklı genel ortalama ve GANO (4'lük sistem)
 - Ders bazlı sınıf ortalaması
+- Ders istatistikleri: öğrenci sayısı, en yüksek ve en düşük not, geçen/kalan sayısı, başarı oranı
 - Genel ve ders bazlı başarı sıralaması
 - Öğrenci ve ders silme (bağlı notlar da temizlenir, onay sorulur)
 - Verileri metin dosyasına kaydetme ve geri yükleme
@@ -105,17 +106,35 @@ classDiagram
         +geciyorMu() boolean
     }
 
+    class DersIstatistigi {
+        -ders: Ders
+        -ogrenciSayisi: int
+        -ortalama: double
+        -enYuksekOgrenci: Ogrenci
+        -enYuksekNot: Not
+        -enDusukOgrenci: Ogrenci
+        -enDusukNot: Not
+        -gecenSayisi: int
+        +getKalanSayisi() int
+        +getBasariOrani() double
+        +bosMu() boolean
+    }
+
     class NotDefteri {
         -ogrenciler: Map~String,Ogrenci~
         -dersler: Map~String,Ders~
         -notlar: Map~String,Map~
         +ogrenciEkle(Ogrenci) void
+        +ogrenciSil(String) Ogrenci
         +dersEkle(Ders) void
+        +dersSil(String) Ders
         +notAta(String,String,double,double) Not
         +notGetir(String,String) Not
         +ogrenciOrtalamasi(String) double
         +ogrenciGano(String) double
         +dersOrtalamasi(String) double
+        +dersIstatistigi(String) DersIstatistigi
+        +dersRaporu(String) String
         +basariSiralamasi() List~Ogrenci~
         +basariSiralamasi(String) List~Ogrenci~
         +ogrenciRaporu(String) String
@@ -146,6 +165,8 @@ classDiagram
     NotDefteri "1" *-- "*" Ogrenci
     NotDefteri "1" *-- "*" Ders
     NotDefteri "1" *-- "*" Not
+    NotDefteri ..> DersIstatistigi : üretir
+    DersIstatistigi --> Ders
     NotDefteri ..> KayitBulunamadiException : fırlatır
     DosyaYoneticisi ..> NotDefteri : kaydeder / yükler
     Main --> NotDefteri
@@ -178,7 +199,8 @@ kyz205-proje-grup-4/
     │   │   ├── Ogretmen.java
     │   │   ├── Ders.java
     │   │   ├── Not.java
-    │   │   └── HarfNotu.java                 Enum
+    │   │   ├── HarfNotu.java                 Enum
+    │   │   └── DersIstatistigi.java          Ders istatistikleri değer nesnesi
     │   └── service/
     │       ├── NotDefteri.java               Koleksiyon yönetimi ve hesaplar
     │       ├── DosyaYoneticisi.java          Dosya G/Ç
@@ -244,6 +266,7 @@ Program açıldığında numaralı bir menü görünür:
 11) Örnek verileri yükle
 12) Öğrenci sil
 13) Ders sil
+14) Ders istatistikleri
 0) Çıkış (veriler otomatik kaydedilir)
 Seçiminiz:
 ```
@@ -267,7 +290,19 @@ KYZ205   Nesne Tabanlı Programlama      Vize:  85.0  Final:  90.0  Ortalama:  8
 Genel Ortalama: 88.00   GANO: 3.50
 ```
 
-5. `9` → Dosyaya kaydet (varsayılan `notdefteri.txt`)
+5. `14` → Ders istatistikleri: `KYZ205`
+
+```
+=== KYZ205 Nesne Tabanlı Programlama (4 kredi) - Ayşe Yılmaz ===
+Öğrenci sayısı : 3
+Sınıf ortalaması: 77.40
+En yüksek       : 93.20 (Zeynep Çelik)
+En düşük        : 51.00 (Can Aydın)
+Geçen / Kalan   : 2 / 1
+Başarı oranı    : %66.7
+```
+
+6. `9` → Dosyaya kaydet (varsayılan `notdefteri.txt`)
 
 ### Not hesaplama kuralları
 
@@ -291,7 +326,7 @@ NOT;2024001;KYZ205;85.0;90.0
 
 ## Testler
 
-JUnit 5 ile yazılmış 32 birim testi bulunur:
+JUnit 5 ile yazılmış 34 birim testi bulunur:
 
 | Test sınıfı | Kapsam |
 |-------------|--------|
@@ -299,7 +334,7 @@ JUnit 5 ile yazılmış 32 birim testi bulunur:
 | `HarfNotuTest` | Harf sınırları ve katsayılar |
 | `OgrenciTest` | Boş alan doğrulaması, ders ekleme/çıkarma, eşitlik |
 | `DersTest` | Kredi doğrulaması, kod normalizasyonu, öğretim üyesi raporu |
-| `NotDefteriTest` | Not atama, mükerrer kayıt, silme, sınıf ortalaması, kredi ağırlıklı ortalama, sıralama |
+| `NotDefteriTest` | Not atama, mükerrer kayıt, silme, sınıf ortalaması, ders istatistikleri, kredi ağırlıklı ortalama, sıralama |
 | `DosyaYoneticisiTest` | Kaydet/yükle döngüsü, hatalı dosya |
 
 ```bash
@@ -314,6 +349,6 @@ mvnw.cmd test
 | En az 1 kalıtım veya arayüz | `Kisi` kalıtımı ve `Raporlanabilir` arayüzü |
 | Koleksiyon veya dosya G/Ç | Her ikisi: `HashMap`/`ArrayList` ve `DosyaYoneticisi` |
 | UML sınıf diyagramı | Yukarıda (Mermaid) ve `docs/uml.puml` |
-| En az 3 birim testi | 32 test |
+| En az 3 birim testi | 34 test |
 | README.md | Bu dosya |
 | GitHub reposu | `kyz205-proje-grup-4` |
