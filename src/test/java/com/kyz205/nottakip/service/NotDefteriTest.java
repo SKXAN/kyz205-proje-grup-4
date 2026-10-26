@@ -1,6 +1,7 @@
 package com.kyz205.nottakip.service;
 
 import com.kyz205.nottakip.model.Ders;
+import com.kyz205.nottakip.model.DersIstatistigi;
 import com.kyz205.nottakip.model.Not;
 import com.kyz205.nottakip.model.Ogrenci;
 import com.kyz205.nottakip.model.Ogretmen;
@@ -147,6 +148,40 @@ class NotDefteriTest {
     void olmayanKayitSilinemez() {
         assertThrows(KayitBulunamadiException.class, () -> defter.ogrenciSil("9999"));
         assertThrows(KayitBulunamadiException.class, () -> defter.dersSil("YOK101"));
+    }
+
+    @Test
+    @DisplayName("Ders istatistikleri doğru hesaplanır")
+    void dersIstatistigi() {
+        defter.notAta("1001", "KYZ205", 90, 90); // 90, geçer
+        defter.notAta("1002", "KYZ205", 60, 60); // 60, geçer (DD)
+        defter.notAta("1003", "KYZ205", 40, 40); // 40, kalır
+        // MAT101'i kimse almıyor
+
+        DersIstatistigi ist = defter.dersIstatistigi("KYZ205");
+        assertEquals(3, ist.getOgrenciSayisi());
+        assertEquals(63.3333, ist.getOrtalama(), 0.001);
+        assertEquals("1001", ist.getEnYuksekOgrenci().getOgrenciNo());
+        assertEquals(90.0, ist.getEnYuksekNot().ortalama(), 0.0001);
+        assertEquals("1003", ist.getEnDusukOgrenci().getOgrenciNo());
+        assertEquals(2, ist.getGecenSayisi());
+        assertEquals(1, ist.getKalanSayisi());
+        assertEquals(66.6667, ist.getBasariOrani(), 0.001);
+
+        DersIstatistigi bos = defter.dersIstatistigi("MAT101");
+        assertTrue(bos.bosMu());
+        assertEquals(0.0, bos.getBasariOrani(), 0.0001);
+    }
+
+    @Test
+    @DisplayName("Ders raporu istatistik satırlarını içerir")
+    void dersRaporu() {
+        defter.notAta("1001", "KYZ205", 85, 95);
+        String rapor = defter.dersRaporu("KYZ205");
+        assertTrue(rapor.contains("Öğrenci sayısı : 1"));
+        assertTrue(rapor.contains("Ali Demir"));
+        assertTrue(rapor.contains("Başarı oranı"));
+        assertTrue(defter.dersRaporu("MAT101").contains("Bu dersi alan öğrenci yok"));
     }
 
     @Test

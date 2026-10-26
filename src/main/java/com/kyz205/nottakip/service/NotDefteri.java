@@ -1,6 +1,7 @@
 package com.kyz205.nottakip.service;
 
 import com.kyz205.nottakip.model.Ders;
+import com.kyz205.nottakip.model.DersIstatistigi;
 import com.kyz205.nottakip.model.HarfNotu;
 import com.kyz205.nottakip.model.Not;
 import com.kyz205.nottakip.model.Ogrenci;
@@ -201,6 +202,69 @@ public class NotDefteri {
             }
         }
         return sayac == 0 ? 0.0 : toplam / sayac;
+    }
+
+    /**
+     * Bir dersin sınıf istatistiklerini hesaplar: öğrenci sayısı, ortalama,
+     * en yüksek ve en düşük not (sahipleriyle), geçen sayısı.
+     * Dersi kimse almamışsa boş istatistik döner.
+     */
+    public DersIstatistigi dersIstatistigi(String dersKodu) {
+        Ders ders = dersBul(dersKodu);
+        int sayac = 0;
+        int gecen = 0;
+        double toplam = 0;
+        Ogrenci enYuksekOgrenci = null;
+        Not enYuksekNot = null;
+        Ogrenci enDusukOgrenci = null;
+        Not enDusukNot = null;
+
+        for (Ogrenci ogrenci : ogrenciler.values()) {
+            Map<String, Not> ogrencininNotlari = notlar.get(ogrenci.getOgrenciNo());
+            Not not = ogrencininNotlari == null ? null : ogrencininNotlari.get(ders.getKod());
+            if (not == null) {
+                continue;
+            }
+            sayac++;
+            toplam += not.ortalama();
+            if (not.gectiMi()) {
+                gecen++;
+            }
+            if (enYuksekNot == null || not.ortalama() > enYuksekNot.ortalama()) {
+                enYuksekNot = not;
+                enYuksekOgrenci = ogrenci;
+            }
+            if (enDusukNot == null || not.ortalama() < enDusukNot.ortalama()) {
+                enDusukNot = not;
+                enDusukOgrenci = ogrenci;
+            }
+        }
+        if (sayac == 0) {
+            return DersIstatistigi.bos(ders);
+        }
+        return new DersIstatistigi(ders, sayac, toplam / sayac,
+                enYuksekOgrenci, enYuksekNot, enDusukOgrenci, enDusukNot, gecen);
+    }
+
+    /** Ders istatistiklerini okunabilir çok satırlı metin olarak döndürür. */
+    public String dersRaporu(String dersKodu) {
+        DersIstatistigi ist = dersIstatistigi(dersKodu);
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== ").append(ist.getDers().rapor()).append(" ===").append(System.lineSeparator());
+        if (ist.bosMu()) {
+            sb.append("Bu dersi alan öğrenci yok.").append(System.lineSeparator());
+            return sb.toString();
+        }
+        sb.append(String.format("Öğrenci sayısı : %d", ist.getOgrenciSayisi())).append(System.lineSeparator());
+        sb.append(String.format("Sınıf ortalaması: %.2f", ist.getOrtalama())).append(System.lineSeparator());
+        sb.append(String.format("En yüksek       : %.2f (%s)", ist.getEnYuksekNot().ortalama(),
+                ist.getEnYuksekOgrenci().tamAd())).append(System.lineSeparator());
+        sb.append(String.format("En düşük        : %.2f (%s)", ist.getEnDusukNot().ortalama(),
+                ist.getEnDusukOgrenci().tamAd())).append(System.lineSeparator());
+        sb.append(String.format("Geçen / Kalan   : %d / %d", ist.getGecenSayisi(), ist.getKalanSayisi()))
+          .append(System.lineSeparator());
+        sb.append(String.format("Başarı oranı    : %%%.1f", ist.getBasariOrani())).append(System.lineSeparator());
+        return sb.toString();
     }
 
     /** Dersi alan öğrenci sayısı. */

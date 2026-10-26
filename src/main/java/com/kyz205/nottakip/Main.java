@@ -88,6 +88,7 @@ public class Main {
         System.out.println("11) Örnek verileri yükle");
         System.out.println("12) Öğrenci sil");
         System.out.println("13) Ders sil");
+        System.out.println("14) Ders istatistikleri");
         System.out.println("0) Çıkış (veriler otomatik kaydedilir)");
     }
 
@@ -107,6 +108,7 @@ public class Main {
             case "11" -> ornekVeriYukle();
             case "12" -> ogrenciSil();
             case "13" -> dersSil();
+            case "14" -> dersIstatistikleri();
             case "0" -> {
                 return false;
             }
@@ -160,6 +162,11 @@ public class Main {
         }
         defter.dersSil(kod);
         System.out.println("Ders silindi: " + ders);
+    }
+
+    private void dersIstatistikleri() {
+        String kod = oku("Ders kodu: ");
+        System.out.print(defter.dersRaporu(kod));
     }
 
     private void notAta() {
