@@ -89,6 +89,7 @@ public class Main {
         System.out.println("12) Öğrenci sil");
         System.out.println("13) Ders sil");
         System.out.println("14) Ders istatistikleri");
+        System.out.println("15) Harf notu dağılımı");
         System.out.println("0) Çıkış (veriler otomatik kaydedilir)");
     }
 
@@ -109,6 +110,7 @@ public class Main {
             case "12" -> ogrenciSil();
             case "13" -> dersSil();
             case "14" -> dersIstatistikleri();
+            case "15" -> harfDagilimi();
             case "0" -> {
                 return false;
             }
@@ -167,6 +169,15 @@ public class Main {
     private void dersIstatistikleri() {
         String kod = oku("Ders kodu: ");
         System.out.print(defter.dersRaporu(kod));
+    }
+
+    private void harfDagilimi() {
+        String kod = oku("Ders kodu (tüm dersler için boş bırakın): ");
+        if (kod.isBlank()) {
+            System.out.print(defter.harfDagilimiRaporu());
+        } else {
+            System.out.print(defter.harfDagilimiRaporu(kod));
+        }
     }
 
     private void notAta() {

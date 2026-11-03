@@ -2,6 +2,7 @@ package com.kyz205.nottakip.service;
 
 import com.kyz205.nottakip.model.Ders;
 import com.kyz205.nottakip.model.DersIstatistigi;
+import com.kyz205.nottakip.model.HarfNotu;
 import com.kyz205.nottakip.model.Not;
 import com.kyz205.nottakip.model.Ogrenci;
 import com.kyz205.nottakip.model.Ogretmen;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -182,6 +184,48 @@ class NotDefteriTest {
         assertTrue(rapor.contains("Ali Demir"));
         assertTrue(rapor.contains("Başarı oranı"));
         assertTrue(defter.dersRaporu("MAT101").contains("Bu dersi alan öğrenci yok"));
+    }
+
+    @Test
+    @DisplayName("Ders bazlı harf dağılımı her harfi içerir ve doğru sayar")
+    void harfDagilimiDersBazli() {
+        defter.notAta("1001", "KYZ205", 90, 90); // AA
+        defter.notAta("1002", "KYZ205", 85, 85); // BA
+        defter.notAta("1003", "KYZ205", 40, 40); // FF
+        defter.notAta("1001", "MAT101", 70, 70); // CC, başka ders
+
+        Map<HarfNotu, Integer> dagilim = defter.harfDagilimi("KYZ205");
+        assertEquals(HarfNotu.values().length, dagilim.size());
+        assertEquals(1, dagilim.get(HarfNotu.AA));
+        assertEquals(1, dagilim.get(HarfNotu.BA));
+        assertEquals(1, dagilim.get(HarfNotu.FF));
+        assertEquals(0, dagilim.get(HarfNotu.CC));
+        assertEquals(HarfNotu.AA, dagilim.keySet().iterator().next());
+    }
+
+    @Test
+    @DisplayName("Tüm dersler için harf dağılımı bütün notları sayar")
+    void harfDagilimiTumDersler() {
+        defter.notAta("1001", "KYZ205", 90, 90); // AA
+        defter.notAta("1001", "MAT101", 70, 70); // CC
+        defter.notAta("1002", "MAT101", 70, 72); // CC
+
+        Map<HarfNotu, Integer> dagilim = defter.harfDagilimi();
+        assertEquals(1, dagilim.get(HarfNotu.AA));
+        assertEquals(2, dagilim.get(HarfNotu.CC));
+        int toplam = dagilim.values().stream().mapToInt(Integer::intValue).sum();
+        assertEquals(3, toplam);
+    }
+
+    @Test
+    @DisplayName("Harf dağılımı raporu çubuk ve yüzde içerir")
+    void harfDagilimiRaporu() {
+        defter.notAta("1001", "KYZ205", 90, 90);
+        defter.notAta("1002", "KYZ205", 90, 95);
+        String rapor = defter.harfDagilimiRaporu("KYZ205");
+        assertTrue(rapor.contains("AA    2  100.0%  **"));
+        assertTrue(rapor.contains("Toplam not sayısı: 2"));
+        assertTrue(defter.harfDagilimiRaporu("MAT101").contains("Henüz not girilmemiş"));
     }
 
     @Test
