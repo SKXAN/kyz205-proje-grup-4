@@ -107,6 +107,9 @@ package service {
     + dersOrtalamasi(String): double
     + dersIstatistigi(String): DersIstatistigi
     + dersRaporu(String): String
+    + harfDagilimi(String): Map<HarfNotu, Integer>
+    + harfDagilimi(): Map<HarfNotu, Integer>
+    + harfDagilimiRaporu(String): String
     + basariSiralamasi(): List<Ogrenci>
     + basariSiralamasi(String): List<Ogrenci>
     + ogrenciRaporu(String): String

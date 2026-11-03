@@ -22,6 +22,7 @@ konsol tabanlı bir Java uygulaması.
 - Kredi ağırlıklı genel ortalama ve GANO (4'lük sistem)
 - Ders bazlı sınıf ortalaması
 - Ders istatistikleri: öğrenci sayısı, en yüksek ve en düşük not, geçen/kalan sayısı, başarı oranı
+- Harf notu dağılımı (ders bazlı veya tüm dersler), konsolda çubuk grafik olarak
 - Genel ve ders bazlı başarı sıralaması
 - Öğrenci ve ders silme (bağlı notlar da temizlenir, onay sorulur)
 - Verileri metin dosyasına kaydetme ve geri yükleme
@@ -135,6 +136,8 @@ classDiagram
         +dersOrtalamasi(String) double
         +dersIstatistigi(String) DersIstatistigi
         +dersRaporu(String) String
+        +harfDagilimi(String) Map~HarfNotu,Integer~
+        +harfDagilimiRaporu(String) String
         +basariSiralamasi() List~Ogrenci~
         +basariSiralamasi(String) List~Ogrenci~
         +ogrenciRaporu(String) String
@@ -267,6 +270,7 @@ Program açıldığında numaralı bir menü görünür:
 12) Öğrenci sil
 13) Ders sil
 14) Ders istatistikleri
+15) Harf notu dağılımı
 0) Çıkış (veriler otomatik kaydedilir)
 Seçiminiz:
 ```
@@ -302,7 +306,23 @@ Geçen / Kalan   : 2 / 1
 Başarı oranı    : %66.7
 ```
 
-6. `9` → Dosyaya kaydet (varsayılan `notdefteri.txt`)
+6. `15` → Harf notu dağılımı: `KYZ205`
+
+```
+=== Harf Dağılımı: KYZ205 Nesne Tabanlı Programlama ===
+AA    1   33.3%  *
+BA    1   33.3%  *
+BB    0    0.0%
+CB    0    0.0%
+CC    0    0.0%
+DC    0    0.0%
+DD    0    0.0%
+FD    1   33.3%  *
+FF    0    0.0%
+Toplam not sayısı: 3
+```
+
+7. `9` → Dosyaya kaydet (varsayılan `notdefteri.txt`)
 
 ### Not hesaplama kuralları
 
@@ -326,7 +346,7 @@ NOT;2024001;KYZ205;85.0;90.0
 
 ## Testler
 
-JUnit 5 ile yazılmış 34 birim testi bulunur:
+JUnit 5 ile yazılmış 37 birim testi bulunur:
 
 | Test sınıfı | Kapsam |
 |-------------|--------|
@@ -334,7 +354,7 @@ JUnit 5 ile yazılmış 34 birim testi bulunur:
 | `HarfNotuTest` | Harf sınırları ve katsayılar |
 | `OgrenciTest` | Boş alan doğrulaması, ders ekleme/çıkarma, eşitlik |
 | `DersTest` | Kredi doğrulaması, kod normalizasyonu, öğretim üyesi raporu |
-| `NotDefteriTest` | Not atama, mükerrer kayıt, silme, sınıf ortalaması, ders istatistikleri, kredi ağırlıklı ortalama, sıralama |
+| `NotDefteriTest` | Not atama, mükerrer kayıt, silme, sınıf ortalaması, ders istatistikleri, harf dağılımı, kredi ağırlıklı ortalama, sıralama |
 | `DosyaYoneticisiTest` | Kaydet/yükle döngüsü, hatalı dosya |
 
 ```bash
@@ -349,6 +369,6 @@ mvnw.cmd test
 | En az 1 kalıtım veya arayüz | `Kisi` kalıtımı ve `Raporlanabilir` arayüzü |
 | Koleksiyon veya dosya G/Ç | Her ikisi: `HashMap`/`ArrayList` ve `DosyaYoneticisi` |
 | UML sınıf diyagramı | Yukarıda (Mermaid) ve `docs/uml.puml` |
-| En az 3 birim testi | 34 test |
+| En az 3 birim testi | 37 test |
 | README.md | Bu dosya |
 | GitHub reposu | `kyz205-proje-grup-4` |

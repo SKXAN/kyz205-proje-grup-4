@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -264,6 +265,75 @@ public class NotDefteri {
         sb.append(String.format("Geçen / Kalan   : %d / %d", ist.getGecenSayisi(), ist.getKalanSayisi()))
           .append(System.lineSeparator());
         sb.append(String.format("Başarı oranı    : %%%.1f", ist.getBasariOrani())).append(System.lineSeparator());
+        return sb.toString();
+    }
+
+    // ------------------------------------------------------ harf dağılımı
+
+    /**
+     * Bir dersteki harf notu dağılımı: her harf için öğrenci sayısı.
+     * Hiç öğrencisi olmayan harfler de 0 ile yer alır; sıra AA'dan FF'ye.
+     */
+    public Map<HarfNotu, Integer> harfDagilimi(String dersKodu) {
+        Ders ders = dersBul(dersKodu);
+        Map<HarfNotu, Integer> dagilim = bosDagilim();
+        for (Map<String, Not> ogrencininNotlari : notlar.values()) {
+            Not not = ogrencininNotlari.get(ders.getKod());
+            if (not != null) {
+                dagilim.merge(not.harfNotu(), 1, Integer::sum);
+            }
+        }
+        return dagilim;
+    }
+
+    /** Tüm derslerdeki tüm notların harf dağılımı. */
+    public Map<HarfNotu, Integer> harfDagilimi() {
+        Map<HarfNotu, Integer> dagilim = bosDagilim();
+        for (Map<String, Not> ogrencininNotlari : notlar.values()) {
+            for (Not not : ogrencininNotlari.values()) {
+                dagilim.merge(not.harfNotu(), 1, Integer::sum);
+            }
+        }
+        return dagilim;
+    }
+
+    /** Bir dersin harf dağılımını çubuk grafik biçiminde metin olarak döndürür. */
+    public String harfDagilimiRaporu(String dersKodu) {
+        Ders ders = dersBul(dersKodu);
+        return dagilimGrafigi("Harf Dağılımı: " + ders, harfDagilimi(dersKodu));
+    }
+
+    /** Tüm derslerin harf dağılımını çubuk grafik biçiminde metin olarak döndürür. */
+    public String harfDagilimiRaporu() {
+        return dagilimGrafigi("Harf Dağılımı: Tüm Dersler", harfDagilimi());
+    }
+
+    private static Map<HarfNotu, Integer> bosDagilim() {
+        Map<HarfNotu, Integer> dagilim = new EnumMap<>(HarfNotu.class);
+        for (HarfNotu harf : HarfNotu.values()) {
+            dagilim.put(harf, 0);
+        }
+        return dagilim;
+    }
+
+    private static String dagilimGrafigi(String baslik, Map<HarfNotu, Integer> dagilim) {
+        int toplam = 0;
+        for (int sayi : dagilim.values()) {
+            toplam += sayi;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== ").append(baslik).append(" ===").append(System.lineSeparator());
+        if (toplam == 0) {
+            sb.append("Henüz not girilmemiş.").append(System.lineSeparator());
+            return sb.toString();
+        }
+        for (Map.Entry<HarfNotu, Integer> giris : dagilim.entrySet()) {
+            int sayi = giris.getValue();
+            double yuzde = 100.0 * sayi / toplam;
+            sb.append(String.format("%-3s %3d  %5.1f%%  %s", giris.getKey(), sayi, yuzde, "*".repeat(sayi)))
+              .append(System.lineSeparator());
+        }
+        sb.append("Toplam not sayısı: ").append(toplam).append(System.lineSeparator());
         return sb.toString();
     }
 
