@@ -26,6 +26,7 @@ konsol tabanlı bir Java uygulaması.
 - Genel ve ders bazlı başarı sıralaması
 - Öğrenci ve ders silme (bağlı notlar da temizlenir, onay sorulur)
 - Verileri metin dosyasına kaydetme ve geri yükleme
+- Genel sıralamayı ve ders not listesini Excel uyumlu CSV dosyasına aktarma
 - Açılışta `notdefteri.txt` varsa otomatik yükleme, çıkışta otomatik kaydetme
 - Hatalı girişlerde (0–100 dışı not, mükerrer kayıt, olmayan öğrenci) anlamlı hata mesajları
 
@@ -39,7 +40,7 @@ konsol tabanlı bir Java uygulaması.
 | **Kapsülleme** | Tüm alanlar `private`, erişim getter/setter ile; `Not` sınıfı 0–100 doğrulaması yapar |
 | **Koleksiyonlar** | `NotDefteri` içinde `HashMap`, `LinkedHashMap`, `ArrayList` |
 | **Enum** | `HarfNotu` harf notlarını ve katsayıları tutar |
-| **Dosya G/Ç** | `DosyaYoneticisi` ile `java.nio.file` üzerinden kaydet/yükle |
+| **Dosya G/Ç** | `DosyaYoneticisi` ile `java.nio.file` üzerinden kaydet/yükle, `CsvDisaAktarici` ile CSV raporu |
 | **Özel istisna** | `KayitBulunamadiException` |
 
 ## UML Sınıf Diyagramı
@@ -148,6 +149,11 @@ classDiagram
         +yukle(Path) NotDefteri
     }
 
+    class CsvDisaAktarici {
+        +siralamaAktar(NotDefteri, Path) void
+        +dersNotlariAktar(NotDefteri, String, Path) void
+    }
+
     class KayitBulunamadiException {
         +KayitBulunamadiException(String)
     }
@@ -172,8 +178,10 @@ classDiagram
     DersIstatistigi --> Ders
     NotDefteri ..> KayitBulunamadiException : fırlatır
     DosyaYoneticisi ..> NotDefteri : kaydeder / yükler
+    CsvDisaAktarici ..> NotDefteri : okur
     Main --> NotDefteri
     Main --> DosyaYoneticisi
+    Main --> CsvDisaAktarici
 ```
 
 PlantUML kaynağı: [docs/uml.puml](docs/uml.puml)
@@ -191,7 +199,10 @@ kyz205-proje-grup-4/
 │   ├── uml.puml                  UML sınıf diyagramı (PlantUML)
 │   ├── GOREV_DAGILIMI.md         Roller ve haftalık plan
 │   ├── GITHUB_ADIMLARI.md        Branch / commit / PR rehberi
-│   └── RAPOR_TASLAGI.md          Proje raporu şablonu
+│   ├── HAFTALIK_ILERLEME.md      Hafta hafta yapılan işler
+│   ├── RAPOR_TASLAGI.md          Proje raporu
+│   ├── test-sonuclari.md         Birim testi koşum kayıtları
+│   └── manuel-test.md            Elle yapılan test çıktıları
 └── src/
     ├── main/java/com/kyz205/nottakip/
     │   ├── Main.java                         Konsol menüsü
@@ -206,7 +217,8 @@ kyz205-proje-grup-4/
     │   │   └── DersIstatistigi.java          Ders istatistikleri değer nesnesi
     │   └── service/
     │       ├── NotDefteri.java               Koleksiyon yönetimi ve hesaplar
-    │       ├── DosyaYoneticisi.java          Dosya G/Ç
+    │       ├── DosyaYoneticisi.java          Dosya G/Ç (kaydet / yükle)
+    │       ├── CsvDisaAktarici.java          CSV raporu üretimi
     │       └── KayitBulunamadiException.java
     └── test/java/com/kyz205/nottakip/
         ├── model/NotTest.java
@@ -214,7 +226,8 @@ kyz205-proje-grup-4/
         ├── model/OgrenciTest.java
         ├── model/DersTest.java
         ├── service/NotDefteriTest.java
-        └── service/DosyaYoneticisiTest.java
+        ├── service/DosyaYoneticisiTest.java
+        └── service/CsvDisaAktariciTest.java
 ```
 
 ## Kurulum ve Çalıştırma
@@ -271,6 +284,7 @@ Program açıldığında numaralı bir menü görünür:
 13) Ders sil
 14) Ders istatistikleri
 15) Harf notu dağılımı
+16) CSV olarak dışa aktar
 0) Çıkış (veriler otomatik kaydedilir)
 Seçiminiz:
 ```
@@ -322,7 +336,17 @@ FF    0    0.0%
 Toplam not sayısı: 3
 ```
 
-7. `9` → Dosyaya kaydet (varsayılan `notdefteri.txt`)
+7. `16` → CSV olarak dışa aktar: ders kodu boş bırakılırsa genel sıralama `siralama.csv`
+   dosyasına, ders kodu girilirse o dersin not listesi `KYZ205-notlar.csv` dosyasına yazılır
+
+```
+Sıra;Öğrenci No;Ad Soyad;Vize;Final;Ortalama;Harf;Durum
+1;2024002;Zeynep Çelik;95,00;92,00;93,20;AA;Geçti
+2;2024001;Ali Demir;85,00;90,00;88,00;BA;Geçti
+3;2024003;Can Aydın;45,00;55,00;51,00;FD;Kaldı
+```
+
+8. `9` → Dosyaya kaydet (varsayılan `notdefteri.txt`)
 
 ### Not hesaplama kuralları
 
@@ -344,9 +368,20 @@ OGRENCI;2024001;Ali;Demir
 NOT;2024001;KYZ205;85.0;90.0
 ```
 
+Bir alanın içinde `;` veya `\` geçiyorsa önüne `\` konarak yazılır (örneğin soyadı
+`Demir;Kaya` olan öğrenci dosyada `Demir\;Kaya` olarak durur) ve okurken geri çözülür.
+Alan sayısı eksik ya da fazla olan satırlar, satır numarasını belirten bir hata ile reddedilir.
+
+### CSV dosyası biçimi
+
+Menüdeki **16** seçeneği ile üretilen CSV dosyaları Türkçe ayarlı Excel ile doğrudan
+açılabilir: alan ayırıcı `;`, ondalık ayırıcı `,` kullanılır ve Türkçe karakterlerin
+doğru görünmesi için dosya UTF-8 BOM ile başlar. Ayırıcı ya da çift tırnak içeren
+alanlar çift tırnak içine alınır.
+
 ## Testler
 
-JUnit 5 ile yazılmış 37 birim testi bulunur:
+JUnit 5 ile yazılmış 45 birim testi bulunur:
 
 | Test sınıfı | Kapsam |
 |-------------|--------|
@@ -355,7 +390,8 @@ JUnit 5 ile yazılmış 37 birim testi bulunur:
 | `OgrenciTest` | Boş alan doğrulaması, ders ekleme/çıkarma, eşitlik |
 | `DersTest` | Kredi doğrulaması, kod normalizasyonu, öğretim üyesi raporu |
 | `NotDefteriTest` | Not atama, mükerrer kayıt, silme, sınıf ortalaması, ders istatistikleri, harf dağılımı, kredi ağırlıklı ortalama, sıralama |
-| `DosyaYoneticisiTest` | Kaydet/yükle döngüsü, hatalı dosya |
+| `DosyaYoneticisiTest` | Kaydet/yükle döngüsü, ayırıcı karakter kaçışı, eksik alan ve hatalı dosya |
+| `CsvDisaAktariciTest` | Sıralama ve ders notu CSV çıktısı, özel karakter kaçışı, boş defter |
 
 ```bash
 mvnw.cmd test
@@ -365,10 +401,10 @@ mvnw.cmd test
 
 | Gereksinim | Durum |
 |------------|-------|
-| En az 3 sınıf | 10 sınıf + 1 arayüz + 1 enum |
+| En az 3 sınıf | 11 sınıf + 1 arayüz + 1 enum |
 | En az 1 kalıtım veya arayüz | `Kisi` kalıtımı ve `Raporlanabilir` arayüzü |
-| Koleksiyon veya dosya G/Ç | Her ikisi: `HashMap`/`ArrayList` ve `DosyaYoneticisi` |
+| Koleksiyon veya dosya G/Ç | Her ikisi: `HashMap`/`ArrayList`/`EnumMap` ve `DosyaYoneticisi`, `CsvDisaAktarici` |
 | UML sınıf diyagramı | Yukarıda (Mermaid) ve `docs/uml.puml` |
-| En az 3 birim testi | 37 test |
+| En az 3 birim testi | 45 test |
 | README.md | Bu dosya |
 | GitHub reposu | `kyz205-proje-grup-4` |

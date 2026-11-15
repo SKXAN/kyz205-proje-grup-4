@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -68,5 +69,52 @@ class DosyaYoneticisiTest {
         DosyaYoneticisi yonetici = new DosyaYoneticisi();
         IOException hata = assertThrows(IOException.class, () -> yonetici.yukle(dosya));
         assertEquals(true, hata.getMessage().contains("Satır 2"));
+    }
+
+    @Test
+    @DisplayName("Ayırıcı karakter içeren alanlar bozulmadan kaydedilip yüklenir")
+    void ayiriciIcerenAlanlarKorunur() throws IOException {
+        NotDefteri orijinal = new NotDefteri();
+        Ogretmen hoca = new Ogretmen("Ayşe", "Yılmaz", "Bilgisayar; Yazılım");
+        orijinal.dersEkle(new Ders("KYZ205", "Nesne; Tabanlı Programlama", 4, hoca));
+        orijinal.ogrenciEkle(new Ogrenci("1", "Ali", "Demir;Kaya"));
+        orijinal.notAta("1", "KYZ205", 80, 90);
+
+        Path dosya = geciciKlasor.resolve("ayirici.txt");
+        DosyaYoneticisi yonetici = new DosyaYoneticisi();
+        yonetici.kaydet(orijinal, dosya);
+        NotDefteri yuklenen = yonetici.yukle(dosya);
+
+        assertEquals("Nesne; Tabanlı Programlama", yuklenen.dersBul("KYZ205").getAd());
+        assertEquals("Bilgisayar; Yazılım", yuklenen.dersBul("KYZ205").getOgretimUyesi().getBrans());
+        assertEquals("Demir;Kaya", yuklenen.ogrenciBul("1").getSoyad());
+        assertEquals(86.0, yuklenen.notGetir("1", "KYZ205").ortalama(), 0.0001);
+    }
+
+    @Test
+    @DisplayName("Ters bölü içeren alanlar bozulmadan kaydedilip yüklenir")
+    void tersBoluIcerenAlanKorunur() throws IOException {
+        NotDefteri orijinal = new NotDefteri();
+        orijinal.ogrenciEkle(new Ogrenci("2", "Ali\\Veli", "De\\;mir"));
+
+        Path dosya = geciciKlasor.resolve("tersbolu.txt");
+        DosyaYoneticisi yonetici = new DosyaYoneticisi();
+        yonetici.kaydet(orijinal, dosya);
+        NotDefteri yuklenen = yonetici.yukle(dosya);
+
+        assertEquals("Ali\\Veli", yuklenen.ogrenciBul("2").getAd());
+        assertEquals("De\\;mir", yuklenen.ogrenciBul("2").getSoyad());
+        assertEquals(List.of("a;b", "c\\d", ""), DosyaYoneticisi.alanlaraAyir("a\\;b;c\\\\d;"));
+    }
+
+    @Test
+    @DisplayName("Eksik alanlı kayıt satır numarası ve beklenen alan sayısıyla hata verir")
+    void eksikAlanHataVerir() throws IOException {
+        Path dosya = geciciKlasor.resolve("eksik.txt");
+        Files.writeString(dosya, "# yorum\nOGRENCI;1;Ali\n", StandardCharsets.UTF_8);
+        DosyaYoneticisi yonetici = new DosyaYoneticisi();
+        IOException hata = assertThrows(IOException.class, () -> yonetici.yukle(dosya));
+        assertEquals(true, hata.getMessage().contains("Satır 2"));
+        assertEquals(true, hata.getMessage().contains("4 alan içermeli"));
     }
 }

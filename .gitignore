@@ -11,8 +11,9 @@ out/
 .project
 .classpath
 
-# Çalışma zamanında üretilen veri dosyası
+# Çalışma zamanında üretilen veri dosyaları
 notdefteri.txt
+*.csv
 
 # İşletim sistemi
 .DS_Store

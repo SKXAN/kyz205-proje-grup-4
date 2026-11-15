@@ -120,6 +120,11 @@ package service {
     + yukle(Path): NotDefteri
   }
 
+  class CsvDisaAktarici {
+    + siralamaAktar(NotDefteri, Path): void
+    + dersNotlariAktar(NotDefteri, String, Path): void
+  }
+
   class KayitBulunamadiException extends RuntimeException {
     + KayitBulunamadiException(String)
   }
@@ -145,6 +150,8 @@ NotDefteri ..> DersIstatistigi : üretir
 DersIstatistigi --> Ders
 NotDefteri ..> KayitBulunamadiException : fırlatır
 DosyaYoneticisi ..> NotDefteri : kaydeder / yükler
+CsvDisaAktarici ..> NotDefteri : okur
 Main --> NotDefteri
 Main --> DosyaYoneticisi
+Main --> CsvDisaAktarici
 @enduml
