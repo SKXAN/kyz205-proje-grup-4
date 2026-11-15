@@ -3,6 +3,7 @@ package com.kyz205.nottakip;
 import com.kyz205.nottakip.model.Ders;
 import com.kyz205.nottakip.model.Ogrenci;
 import com.kyz205.nottakip.model.Ogretmen;
+import com.kyz205.nottakip.service.CsvDisaAktarici;
 import com.kyz205.nottakip.service.DosyaYoneticisi;
 import com.kyz205.nottakip.service.KayitBulunamadiException;
 import com.kyz205.nottakip.service.NotDefteri;
@@ -22,6 +23,7 @@ public class Main {
 
     private final Scanner giris = new Scanner(System.in);
     private final DosyaYoneticisi dosya = new DosyaYoneticisi();
+    private final CsvDisaAktarici csv = new CsvDisaAktarici();
     private NotDefteri defter = new NotDefteri();
 
     public static void main(String[] args) {
@@ -90,6 +92,7 @@ public class Main {
         System.out.println("13) Ders sil");
         System.out.println("14) Ders istatistikleri");
         System.out.println("15) Harf notu dağılımı");
+        System.out.println("16) CSV olarak dışa aktar");
         System.out.println("0) Çıkış (veriler otomatik kaydedilir)");
     }
 
@@ -111,6 +114,7 @@ public class Main {
             case "13" -> dersSil();
             case "14" -> dersIstatistikleri();
             case "15" -> harfDagilimi();
+            case "16" -> csvAktar();
             case "0" -> {
                 return false;
             }
@@ -178,6 +182,25 @@ public class Main {
         } else {
             System.out.print(defter.harfDagilimiRaporu(kod));
         }
+    }
+
+    private void csvAktar() throws IOException {
+        String kod = oku("Ders kodu (genel sıralama için boş bırakın): ");
+        Path hedef;
+        if (kod.isBlank()) {
+            hedef = csvYoluOku("siralama.csv");
+            csv.siralamaAktar(defter, hedef);
+        } else {
+            Ders ders = defter.dersBul(kod);
+            hedef = csvYoluOku(ders.getKod() + "-notlar.csv");
+            csv.dersNotlariAktar(defter, ders.getKod(), hedef);
+        }
+        System.out.println("CSV dosyası oluşturuldu: " + hedef.toAbsolutePath());
+    }
+
+    private Path csvYoluOku(String varsayilan) {
+        String yol = oku("Dosya yolu [" + varsayilan + "]: ");
+        return yol.isBlank() ? Path.of(varsayilan) : Path.of(yol);
     }
 
     private void notAta() {
