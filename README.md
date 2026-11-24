@@ -35,7 +35,7 @@ konsol tabanlı bir Java uygulaması.
 | İlke | Nerede |
 |------|--------|
 | **Soyut sınıf ve kalıtım** | `Kisi` (abstract) → `Ogrenci`, `Ogretmen` |
-| **Arayüz** | `Raporlanabilir` → `Kisi`, `Ders` tarafından uygulanır |
+| **Arayüz** | `Raporlanabilir` → `Kisi`, `Ders` tarafından uygulanır; menü işlemleri `Islem` fonksiyonel arayüzü ile tanımlanır |
 | **Çok biçimlilik** | `Kisi.rol()` ve `Raporlanabilir.rapor()` her alt sınıfta farklı davranır |
 | **Kapsülleme** | Tüm alanlar `private`, erişim getter/setter ile; `Not` sınıfı 0–100 doğrulaması yapar |
 | **Koleksiyonlar** | `NotDefteri` içinde `HashMap`, `LinkedHashMap`, `ArrayList` |
@@ -159,7 +159,21 @@ classDiagram
     }
 
     class Main {
+        -menu: Map~String,MenuSecenegi~
         +main(String[])$ void
+        ~calistir() void
+    }
+
+    class MenuSecenegi {
+        <<record>>
+        +tus: String
+        +baslik: String
+        +islem: Islem
+    }
+
+    class Islem {
+        <<interface>>
+        +calistir() void
     }
 
     Raporlanabilir <|.. Kisi
@@ -182,6 +196,8 @@ classDiagram
     Main --> NotDefteri
     Main --> DosyaYoneticisi
     Main --> CsvDisaAktarici
+    Main "1" *-- "*" MenuSecenegi
+    MenuSecenegi --> Islem
 ```
 
 PlantUML kaynağı: [docs/uml.puml](docs/uml.puml)
@@ -201,6 +217,7 @@ kyz205-proje-grup-4/
 │   ├── GITHUB_ADIMLARI.md        Branch / commit / PR rehberi
 │   ├── HAFTALIK_ILERLEME.md      Hafta hafta yapılan işler
 │   ├── RAPOR_TASLAGI.md          Proje raporu
+│   ├── SUNUM_SENARYOSU.md        Sunum akışı, canlı gösterim adımları, olası sorular
 │   ├── test-sonuclari.md         Birim testi koşum kayıtları
 │   └── manuel-test.md            Elle yapılan test çıktıları
 └── src/
@@ -221,6 +238,7 @@ kyz205-proje-grup-4/
     │       ├── CsvDisaAktarici.java          CSV raporu üretimi
     │       └── KayitBulunamadiException.java
     └── test/java/com/kyz205/nottakip/
+        ├── MainTest.java                     Menünün uçtan uca testleri
         ├── model/NotTest.java
         ├── model/HarfNotuTest.java
         ├── model/OgrenciTest.java
@@ -381,7 +399,7 @@ alanlar çift tırnak içine alınır.
 
 ## Testler
 
-JUnit 5 ile yazılmış 45 birim testi bulunur:
+JUnit 5 ile yazılmış 51 birim testi bulunur:
 
 | Test sınıfı | Kapsam |
 |-------------|--------|
@@ -392,6 +410,7 @@ JUnit 5 ile yazılmış 45 birim testi bulunur:
 | `NotDefteriTest` | Not atama, mükerrer kayıt, silme, sınıf ortalaması, ders istatistikleri, harf dağılımı, kredi ağırlıklı ortalama, sıralama |
 | `DosyaYoneticisiTest` | Kaydet/yükle döngüsü, ayırıcı karakter kaçışı, eksik alan ve hatalı dosya |
 | `CsvDisaAktariciTest` | Sıralama ve ders notu CSV çıktısı, özel karakter kaçışı, boş defter |
+| `MainTest` | Menünün uçtan uca denenmesi: sıralama, geçersiz seçim, hata mesajı, oturumlar arası kayıt, girdi sonu |
 
 ```bash
 mvnw.cmd test
@@ -405,6 +424,6 @@ mvnw.cmd test
 | En az 1 kalıtım veya arayüz | `Kisi` kalıtımı ve `Raporlanabilir` arayüzü |
 | Koleksiyon veya dosya G/Ç | Her ikisi: `HashMap`/`ArrayList`/`EnumMap` ve `DosyaYoneticisi`, `CsvDisaAktarici` |
 | UML sınıf diyagramı | Yukarıda (Mermaid) ve `docs/uml.puml` |
-| En az 3 birim testi | 45 test |
+| En az 3 birim testi | 51 test |
 | README.md | Bu dosya |
 | GitHub reposu | `kyz205-proje-grup-4` |
