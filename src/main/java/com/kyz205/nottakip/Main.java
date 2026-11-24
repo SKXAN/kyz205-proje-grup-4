@@ -9,117 +9,148 @@ import com.kyz205.nottakip.service.KayitBulunamadiException;
 import com.kyz205.nottakip.service.NotDefteri;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
  * Konsol tabanlı kullanıcı arayüzü. Menü üzerinden NotDefteri işlemlerini sunar.
+ *
+ * Girdi ve çıktı akışları ile veri dosyası dışarıdan verilir; böylece sınıf
+ * gerçek konsol olmadan da (birim testlerinde) çalıştırılabilir.
  */
 public class Main {
 
     private static final Path VARSAYILAN_DOSYA = Path.of("notdefteri.txt");
+    private static final String CIKIS_TUSU = "0";
 
-    private final Scanner giris = new Scanner(System.in);
+    /** Menüdeki bir işlemin gövdesi; dosya işlemleri IOException fırlatabilir. */
+    @FunctionalInterface
+    private interface Islem {
+        void calistir() throws IOException;
+    }
+
+    /** Menüde gösterilen tek bir seçenek: tuş, başlık ve çalıştırılacak işlem. */
+    private record MenuSecenegi(String tus, String baslik, Islem islem) {
+    }
+
+    /** Okunacak girdi kalmadığında (dosya sonu, Ctrl+Z) döngüden çıkmak için kullanılır. */
+    private static final class GirdiSonuException extends RuntimeException {
+    }
+
+    private final Scanner giris;
+    private final PrintStream cikti;
+    private final Path veriDosyasi;
+    private final Map<String, MenuSecenegi> menu = new LinkedHashMap<>();
     private final DosyaYoneticisi dosya = new DosyaYoneticisi();
     private final CsvDisaAktarici csv = new CsvDisaAktarici();
     private NotDefteri defter = new NotDefteri();
 
     public static void main(String[] args) {
-        new Main().calistir();
+        new Main(System.in, System.out, VARSAYILAN_DOSYA).calistir();
     }
 
-    private void calistir() {
-        System.out.println("=== Öğrenci Not Takip Sistemi ===");
+    Main(InputStream girdi, PrintStream cikti, Path veriDosyasi) {
+        this.giris = new Scanner(girdi);
+        this.cikti = cikti;
+        this.veriDosyasi = veriDosyasi;
+        menuyuKur();
+    }
+
+    /** Menü seçeneklerini gösterilecekleri sırayla tanımlar. */
+    private void menuyuKur() {
+        secenekEkle("1", "Öğrenci ekle", this::ogrenciEkle);
+        secenekEkle("2", "Öğretim üyesi ile ders ekle", this::dersEkle);
+        secenekEkle("3", "Not ata (vize/final)", this::notAta);
+        secenekEkle("4", "Öğrenci raporu", this::ogrenciRaporu);
+        secenekEkle("5", "Ders sınıf ortalaması", this::dersOrtalamasi);
+        secenekEkle("6", "Genel başarı sıralaması", this::genelSiralama);
+        secenekEkle("7", "Ders bazlı başarı sıralaması", this::dersSiralamasi);
+        secenekEkle("8", "Öğrenci ve ders listesi", this::listele);
+        secenekEkle("9", "Dosyaya kaydet", this::kaydet);
+        secenekEkle("10", "Dosyadan yükle", this::yukle);
+        secenekEkle("11", "Örnek verileri yükle", this::ornekVeriYukle);
+        secenekEkle("12", "Öğrenci sil", this::ogrenciSil);
+        secenekEkle("13", "Ders sil", this::dersSil);
+        secenekEkle("14", "Ders istatistikleri", this::dersIstatistikleri);
+        secenekEkle("15", "Harf notu dağılımı", this::harfDagilimi);
+        secenekEkle("16", "CSV olarak dışa aktar", this::csvAktar);
+    }
+
+    private void secenekEkle(String tus, String baslik, Islem islem) {
+        menu.put(tus, new MenuSecenegi(tus, baslik, islem));
+    }
+
+    void calistir() {
+        cikti.println("=== Öğrenci Not Takip Sistemi ===");
         otomatikYukle();
         boolean devam = true;
         while (devam) {
             menuyuYazdir();
-            String secim = oku("Seçiminiz: ");
             try {
-                devam = secimiIsle(secim);
+                devam = secimiIsle(oku("Seçiminiz: "));
+            } catch (GirdiSonuException girdiBitti) {
+                devam = false;
             } catch (KayitBulunamadiException | IllegalArgumentException hata) {
-                System.out.println("Hata: " + hata.getMessage());
+                cikti.println("Hata: " + hata.getMessage());
             } catch (IOException hata) {
-                System.out.println("Dosya hatası: " + hata.getMessage());
+                cikti.println("Dosya hatası: " + hata.getMessage());
             }
-            System.out.println();
+            cikti.println();
         }
         otomatikKaydet();
-        System.out.println("Program sonlandırıldı.");
+        cikti.println("Program sonlandırıldı.");
     }
 
-    /** Açılışta varsayılan veri dosyası varsa sessizce yükler. */
+    /** Açılışta veri dosyası varsa sessizce yükler. */
     private void otomatikYukle() {
-        if (!Files.exists(VARSAYILAN_DOSYA)) {
+        if (!Files.exists(veriDosyasi)) {
             return;
         }
         try {
-            defter = dosya.yukle(VARSAYILAN_DOSYA);
-            System.out.println(VARSAYILAN_DOSYA + " dosyasından " + defter.tumOgrenciler().size()
+            defter = dosya.yukle(veriDosyasi);
+            cikti.println(veriDosyasi + " dosyasından " + defter.tumOgrenciler().size()
                     + " öğrenci, " + defter.tumDersler().size() + " ders yüklendi.");
         } catch (IOException hata) {
-            System.out.println("Uyarı: " + VARSAYILAN_DOSYA + " okunamadı, boş defterle başlanıyor. ("
+            cikti.println("Uyarı: " + veriDosyasi + " okunamadı, boş defterle başlanıyor. ("
                     + hata.getMessage() + ")");
         }
     }
 
-    /** Çıkışta mevcut defteri varsayılan dosyaya kaydeder. */
+    /** Çıkışta mevcut defteri veri dosyasına kaydeder. */
     private void otomatikKaydet() {
         try {
-            dosya.kaydet(defter, VARSAYILAN_DOSYA);
-            System.out.println("Veriler " + VARSAYILAN_DOSYA + " dosyasına kaydedildi.");
+            dosya.kaydet(defter, veriDosyasi);
+            cikti.println("Veriler " + veriDosyasi + " dosyasına kaydedildi.");
         } catch (IOException hata) {
-            System.out.println("Uyarı: veriler kaydedilemedi. (" + hata.getMessage() + ")");
+            cikti.println("Uyarı: veriler kaydedilemedi. (" + hata.getMessage() + ")");
         }
     }
 
     private void menuyuYazdir() {
-        System.out.println();
-        System.out.println("1) Öğrenci ekle");
-        System.out.println("2) Öğretim üyesi ile ders ekle");
-        System.out.println("3) Not ata (vize/final)");
-        System.out.println("4) Öğrenci raporu");
-        System.out.println("5) Ders sınıf ortalaması");
-        System.out.println("6) Genel başarı sıralaması");
-        System.out.println("7) Ders bazlı başarı sıralaması");
-        System.out.println("8) Öğrenci ve ders listesi");
-        System.out.println("9) Dosyaya kaydet");
-        System.out.println("10) Dosyadan yükle");
-        System.out.println("11) Örnek verileri yükle");
-        System.out.println("12) Öğrenci sil");
-        System.out.println("13) Ders sil");
-        System.out.println("14) Ders istatistikleri");
-        System.out.println("15) Harf notu dağılımı");
-        System.out.println("16) CSV olarak dışa aktar");
-        System.out.println("0) Çıkış (veriler otomatik kaydedilir)");
+        cikti.println();
+        for (MenuSecenegi secenek : menu.values()) {
+            cikti.println(secenek.tus() + ") " + secenek.baslik());
+        }
+        cikti.println(CIKIS_TUSU + ") Çıkış (veriler otomatik kaydedilir)");
     }
 
     /** Menü seçimini işler; program devam edecekse true döner. */
     private boolean secimiIsle(String secim) throws IOException {
-        switch (secim) {
-            case "1" -> ogrenciEkle();
-            case "2" -> dersEkle();
-            case "3" -> notAta();
-            case "4" -> ogrenciRaporu();
-            case "5" -> dersOrtalamasi();
-            case "6" -> genelSiralama();
-            case "7" -> dersSiralamasi();
-            case "8" -> listele();
-            case "9" -> kaydet();
-            case "10" -> yukle();
-            case "11" -> ornekVeriYukle();
-            case "12" -> ogrenciSil();
-            case "13" -> dersSil();
-            case "14" -> dersIstatistikleri();
-            case "15" -> harfDagilimi();
-            case "16" -> csvAktar();
-            case "0" -> {
-                return false;
-            }
-            default -> System.out.println("Geçersiz seçim.");
+        if (CIKIS_TUSU.equals(secim)) {
+            return false;
         }
+        MenuSecenegi secenek = menu.get(secim);
+        if (secenek == null) {
+            cikti.println("Geçersiz seçim.");
+            return true;
+        }
+        secenek.islem().calistir();
         return true;
     }
 
@@ -130,7 +161,7 @@ public class Main {
         String ad = oku("Ad: ");
         String soyad = oku("Soyad: ");
         defter.ogrenciEkle(new Ogrenci(no, ad, soyad));
-        System.out.println("Öğrenci eklendi.");
+        cikti.println("Öğrenci eklendi.");
     }
 
     private void dersEkle() {
@@ -142,7 +173,7 @@ public class Main {
         String brans = oku("Branş: ");
         Ogretmen hoca = new Ogretmen(hocaAd, hocaSoyad, brans);
         defter.dersEkle(new Ders(kod, ad, kredi, hoca));
-        System.out.println("Ders eklendi.");
+        cikti.println("Ders eklendi.");
     }
 
     private void ogrenciSil() {
@@ -150,11 +181,11 @@ public class Main {
         Ogrenci ogrenci = defter.ogrenciBul(no);
         String onay = oku(ogrenci.tamAd() + " ve tüm notları silinecek. Emin misiniz? (E/h): ");
         if (!onay.equalsIgnoreCase("E")) {
-            System.out.println("İptal edildi.");
+            cikti.println("İptal edildi.");
             return;
         }
         defter.ogrenciSil(no);
-        System.out.println("Öğrenci silindi: " + ogrenci.tamAd());
+        cikti.println("Öğrenci silindi: " + ogrenci.tamAd());
     }
 
     private void dersSil() {
@@ -163,24 +194,24 @@ public class Main {
         int alan = defter.dersiAlanSayisi(kod);
         String onay = oku(ders + " silinecek (" + alan + " öğrencinin notu da silinir). Emin misiniz? (E/h): ");
         if (!onay.equalsIgnoreCase("E")) {
-            System.out.println("İptal edildi.");
+            cikti.println("İptal edildi.");
             return;
         }
         defter.dersSil(kod);
-        System.out.println("Ders silindi: " + ders);
+        cikti.println("Ders silindi: " + ders);
     }
 
     private void dersIstatistikleri() {
         String kod = oku("Ders kodu: ");
-        System.out.print(defter.dersRaporu(kod));
+        cikti.print(defter.dersRaporu(kod));
     }
 
     private void harfDagilimi() {
         String kod = oku("Ders kodu (tüm dersler için boş bırakın): ");
         if (kod.isBlank()) {
-            System.out.print(defter.harfDagilimiRaporu());
+            cikti.print(defter.harfDagilimiRaporu());
         } else {
-            System.out.print(defter.harfDagilimiRaporu(kod));
+            cikti.print(defter.harfDagilimiRaporu(kod));
         }
     }
 
@@ -195,7 +226,7 @@ public class Main {
             hedef = csvYoluOku(ders.getKod() + "-notlar.csv");
             csv.dersNotlariAktar(defter, ders.getKod(), hedef);
         }
-        System.out.println("CSV dosyası oluşturuldu: " + hedef.toAbsolutePath());
+        cikti.println("CSV dosyası oluşturuldu: " + hedef.toAbsolutePath());
     }
 
     private Path csvYoluOku(String varsayilan) {
@@ -209,12 +240,12 @@ public class Main {
         double vize = okuOndalik("Vize (0-100): ");
         double finalNotu = okuOndalik("Final (0-100): ");
         var not = defter.notAta(no, kod, vize, finalNotu);
-        System.out.println("Not kaydedildi -> " + not);
+        cikti.println("Not kaydedildi -> " + not);
     }
 
     private void ogrenciRaporu() {
         String no = oku("Öğrenci no: ");
-        System.out.print(defter.ogrenciRaporu(no));
+        cikti.print(defter.ogrenciRaporu(no));
     }
 
     private void dersOrtalamasi() {
@@ -222,23 +253,23 @@ public class Main {
         Ders ders = defter.dersBul(kod);
         int alan = defter.dersiAlanSayisi(kod);
         if (alan == 0) {
-            System.out.println(ders + " dersine henüz not girilmemiş.");
+            cikti.println(ders + " dersine henüz not girilmemiş.");
             return;
         }
-        System.out.printf("%s dersi sınıf ortalaması: %.2f (%d öğrenci)%n",
+        cikti.printf("%s dersi sınıf ortalaması: %.2f (%d öğrenci)%n",
                 ders, defter.dersOrtalamasi(kod), alan);
     }
 
     private void genelSiralama() {
         List<Ogrenci> sira = defter.basariSiralamasi();
         if (sira.isEmpty()) {
-            System.out.println("Kayıtlı öğrenci yok.");
+            cikti.println("Kayıtlı öğrenci yok.");
             return;
         }
-        System.out.println("Sıra  No         Ad Soyad                 Ortalama  GANO");
+        cikti.println("Sıra  No         Ad Soyad                 Ortalama  GANO");
         int i = 1;
         for (Ogrenci o : sira) {
-            System.out.printf("%-5d %-10s %-24s %8.2f  %.2f%n", i++, o.getOgrenciNo(), o.tamAd(),
+            cikti.printf("%-5d %-10s %-24s %8.2f  %.2f%n", i++, o.getOgrenciNo(), o.tamAd(),
                     defter.ogrenciOrtalamasi(o.getOgrenciNo()), defter.ogrenciGano(o.getOgrenciNo()));
         }
     }
@@ -248,50 +279,50 @@ public class Main {
         Ders ders = defter.dersBul(kod);
         List<Ogrenci> sira = defter.basariSiralamasi(kod);
         if (sira.isEmpty()) {
-            System.out.println(ders + " dersine henüz not girilmemiş.");
+            cikti.println(ders + " dersine henüz not girilmemiş.");
             return;
         }
-        System.out.println(ders + " başarı sıralaması:");
+        cikti.println(ders + " başarı sıralaması:");
         int i = 1;
         for (Ogrenci o : sira) {
-            System.out.printf("%-5d %-10s %-24s %s%n", i++, o.getOgrenciNo(), o.tamAd(),
+            cikti.printf("%-5d %-10s %-24s %s%n", i++, o.getOgrenciNo(), o.tamAd(),
                     defter.notGetir(o.getOgrenciNo(), kod));
         }
     }
 
     private void listele() {
-        System.out.println("-- Dersler --");
+        cikti.println("-- Dersler --");
         if (defter.tumDersler().isEmpty()) {
-            System.out.println("(yok)");
+            cikti.println("(yok)");
         }
         for (Ders d : defter.tumDersler()) {
-            System.out.println(d.rapor());
+            cikti.println(d.rapor());
         }
-        System.out.println("-- Öğrenciler --");
+        cikti.println("-- Öğrenciler --");
         if (defter.tumOgrenciler().isEmpty()) {
-            System.out.println("(yok)");
+            cikti.println("(yok)");
         }
         for (Ogrenci o : defter.tumOgrenciler()) {
-            System.out.println(o.rapor());
+            cikti.println(o.rapor());
         }
     }
 
     private void kaydet() throws IOException {
         Path hedef = dosyaYoluOku();
         dosya.kaydet(defter, hedef);
-        System.out.println("Kaydedildi: " + hedef.toAbsolutePath());
+        cikti.println("Kaydedildi: " + hedef.toAbsolutePath());
     }
 
     private void yukle() throws IOException {
         Path kaynak = dosyaYoluOku();
         defter = dosya.yukle(kaynak);
-        System.out.println("Yüklendi: " + defter.tumOgrenciler().size() + " öğrenci, "
+        cikti.println("Yüklendi: " + defter.tumOgrenciler().size() + " öğrenci, "
                 + defter.tumDersler().size() + " ders.");
     }
 
     private void ornekVeriYukle() {
         defter = ornekDefter();
-        System.out.println("Örnek veriler yüklendi. 4 ve 6 numaralı menüleri deneyin.");
+        cikti.println("Örnek veriler yüklendi. 4 ve 6 numaralı menüleri deneyin.");
     }
 
     /** Hızlı deneme için küçük bir veri kümesi oluşturur. */
@@ -320,12 +351,16 @@ public class Main {
     // ---------------------------------------------------------- yardımcılar
 
     private Path dosyaYoluOku() {
-        String yol = oku("Dosya yolu [" + VARSAYILAN_DOSYA + "]: ");
-        return yol.isBlank() ? VARSAYILAN_DOSYA : Path.of(yol);
+        String yol = oku("Dosya yolu [" + veriDosyasi + "]: ");
+        return yol.isBlank() ? veriDosyasi : Path.of(yol);
     }
 
+    /** Mesajı yazıp bir satır okur. Girdi bittiyse GirdiSonuException fırlatır. */
     private String oku(String mesaj) {
-        System.out.print(mesaj);
+        cikti.print(mesaj);
+        if (!giris.hasNextLine()) {
+            throw new GirdiSonuException();
+        }
         return giris.nextLine().trim();
     }
 
@@ -335,7 +370,7 @@ public class Main {
             try {
                 return Integer.parseInt(metin);
             } catch (NumberFormatException e) {
-                System.out.println("Lütfen tam sayı girin.");
+                cikti.println("Lütfen tam sayı girin.");
             }
         }
     }
@@ -346,7 +381,7 @@ public class Main {
             try {
                 return Double.parseDouble(metin);
             } catch (NumberFormatException e) {
-                System.out.println("Lütfen sayı girin.");
+                cikti.println("Lütfen sayı girin.");
             }
         }
     }

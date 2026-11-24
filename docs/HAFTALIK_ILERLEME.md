@@ -13,8 +13,10 @@ branch'ine Pull Request ile girmiştir. Tarihler commit tarihidir.
 | 4 | 27.10.2026 | Kamer | Ders istatistikleri raporu: en yüksek ve en düşük not, geçen/kalan sayısı, başarı oranı (34 test) | #4 |
 | 5 | 03.11.2026 | Kamer | Harf notu dağılımı: ders bazlı ve genel çubuk grafik (37 test) | #5 |
 | 5 | 04.11.2026 | Hasan | Program elle test edildi, çıktılar `docs/manuel-test.md` dosyasına kaydedildi | #6 |
-| 6 | 15.11.2026 | Kamer | CSV dışa aktarma: genel sıralama ve ders not listesi Excel uyumlu dosyaya yazılıyor (42 test) | |
-| 6 | 15.11.2026 | Kamer | Veri dosyasında ayırıcı karakter kaçışı ve alan sayısı doğrulaması (45 test); README ve rapor güncellendi | |
+| 6 | 15.11.2026 | Kamer | CSV dışa aktarma: genel sıralama ve ders not listesi Excel uyumlu dosyaya yazılıyor (42 test) | #7 |
+| 6 | 15.11.2026 | Kamer | Veri dosyasında ayırıcı karakter kaçışı ve alan sayısı doğrulaması (45 test); README ve rapor güncellendi | #7 |
+| 7 | 17.11.2026 | Hasan | Hatalı giriş ve yeni özellikler (14, 15, 16) elle test edildi, çıktılar kaydedildi | #8 |
+| 8 | 23.11.2026 | Kamer | Menü yapısı tabloya dönüştürüldü, girdi/çıktı akışları dışarıdan verilebilir oldu, menü için 6 uçtan uca test (51 test); sunum senaryosu yazıldı | |
 
 ## Kalan işler
 
@@ -23,6 +25,6 @@ branch'ine Pull Request ile girmiştir. Tarihler commit tarihidir.
 | Program ekran görüntüleri (`docs/ekran-goruntuleri/`) ve README'ye eklenmesi | Ayşe |
 | UML görselinin üretilmesi (`docs/uml.png`) | Ayşe |
 | Raporun 1, 2 ve 8. bölümlerinin tamamlanması | Ayşe |
-| Hatalı giriş testleri ve yeni özelliklerin (14, 15, 16) elle denenmesi | Hasan |
-| Dönem sonu sunumu: slaytlar ve canlı gösterim provası | Tüm ekip |
+| Her yeni sürümde testlerin yeniden koşulması ve `docs/test-sonuclari.md` dosyasına işlenmesi | Hasan |
+| Dönem sonu sunumu: slaytların hazırlanması (`docs/SUNUM_SENARYOSU.md` planına göre) ve canlı gösterim provası | Tüm ekip |
 | Son kod gözden geçirmesi ve teslim öncesi kontrol | Kamer |

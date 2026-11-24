@@ -131,7 +131,19 @@ package service {
 }
 
 class Main {
+  - menu: Map<String, MenuSecenegi>
   + {static} main(String[]): void
+  ~ calistir(): void
+}
+
+class MenuSecenegi <<record>> {
+  + tus: String
+  + baslik: String
+  + islem: Islem
+}
+
+interface Islem {
+  + calistir(): void
 }
 
 Raporlanabilir <|.. Kisi
@@ -154,4 +166,6 @@ CsvDisaAktarici ..> NotDefteri : okur
 Main --> NotDefteri
 Main --> DosyaYoneticisi
 Main --> CsvDisaAktarici
+Main "1" *-- "*" MenuSecenegi
+MenuSecenegi --> Islem
 @enduml

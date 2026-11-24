@@ -66,7 +66,7 @@ işlemlerini içerir. `Main` yalnızca kullanıcıyla konuşur, hesap yapmaz.
 | `DosyaYoneticisi` | service | Metin dosyasına kaydetme ve geri yükleme |
 | `CsvDisaAktarici` | service | Sıralama ve ders notlarını CSV dosyasına yazma |
 | `KayitBulunamadiException` | service | Olmayan öğrenci, ders veya not arandığında fırlatılan istisna |
-| `Main` | (kök) | Konsol menüsü |
+| `Main` | (kök) | Konsol menüsü; seçenekler `MenuSecenegi` kayıtlarından oluşan bir tablodan üretilir |
 
 ### 3.3 Uygulanan OOP İlkeleri
 
@@ -139,13 +139,22 @@ için ilgili harfin sayacı bir artırılır; böylece hiç öğrencisi olmayan 
 dagilim.merge(not.harfNotu(), 1, Integer::sum);
 ```
 
+**Menü tablosu.** Her menü seçeneği tuşu, başlığı ve çalıştıracağı işlemle birlikte tek
+satırda tanımlanır. Menünün ekrana yazılması ve seçimin işlenmesi aynı tablodan yapılır;
+yeni bir seçenek eklemek için tek satır yeterlidir.
+
+```java
+secenekEkle("14", "Ders istatistikleri", this::dersIstatistikleri);
+secenekEkle("15", "Harf notu dağılımı", this::harfDagilimi);
+```
+
 ### 4.3 Ekran Görüntüleri
 
 [Menü, öğrenci raporu, başarı sıralaması, harf dağılımı: `docs/ekran-goruntuleri/` klasöründen eklenecek]
 
 ## 5. Test
 
-Projede JUnit 5 ile yazılmış 45 birim testi vardır; tamamı geçmektedir.
+Projede JUnit 5 ile yazılmış 51 birim testi vardır; tamamı geçmektedir.
 
 | Test sınıfı | Test sayısı | Ne test ediyor |
 |-------------|-------------|----------------|
@@ -156,6 +165,7 @@ Projede JUnit 5 ile yazılmış 45 birim testi vardır; tamamı geçmektedir.
 | `NotDefteriTest` | 17 | Not atama, silme, sınıf ortalaması, istatistikler, harf dağılımı, sıralama |
 | `DosyaYoneticisiTest` | 6 | Kaydet/yükle döngüsü, ayırıcı karakter kaçışı, eksik alan, bozuk dosya |
 | `CsvDisaAktariciTest` | 5 | CSV başlık ve satırları, özel karakter kaçışı, boş defter |
+| `MainTest` | 6 | Menünün uçtan uca denenmesi: hazır girdi verilir, ekran çıktısı kontrol edilir |
 
 Birim testlerine ek olarak program elle de denenmiştir; koşum kayıtları
 `docs/test-sonuclari.md`, elle yapılan denemelerin çıktıları `docs/manuel-test.md` dosyasındadır.
